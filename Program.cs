@@ -13,8 +13,8 @@ namespace AzureAIMiniExamples
         static string visionKey = "<YOUR_VISION_KEY>";
         static string speechEndpoint = "https://<your-speech-endpoint>.cognitiveservices.azure.com/";
         static string speechKey = "<YOUR_SPEECH_KEY>";
-        static string textAnalyticsEndpoint = "https://<your-textanalytics-endpoint>.cognitiveservices.azure.com/";
-        static string textAnalyticsKey = "<YOUR_TEXTANALYTICS_KEY>";
+        static string languageEndpoint = "https://<your-textanalytics-endpoint>.cognitiveservices.azure.com/";
+        static string languageKey = "<YOUR_TEXTANALYTICS_KEY>";
         static string translatorEndpoint = "https://api.cognitive.microsofttranslator.com/";
         static string translatorKey = "<YOUR_TRANSLATOR_KEY>";
         static string searchEndpoint = "https://<your-search-service>.search.windows.net/";
@@ -23,7 +23,6 @@ namespace AzureAIMiniExamples
         static string docIntelligenceKey = "<YOUR_DOCINT_KEY>";
         static string contentSafetyEndpoint = "https://<your-contentsafety-endpoint>.cognitiveservices.azure.com/";
         static string contentSafetyKey = "<YOUR_CONTENTSAFETY_KEY>";
-
         static async Task Main(string[] args)
         {
             Console.WriteLine("Azure AI Mini Examples");
@@ -39,10 +38,13 @@ namespace AzureAIMiniExamples
             Console.WriteLine("Done.");
         }
 
+        /// <summary>
+        ///  Analyze image to extract text (OCR) & description.
+        /// </summary>
         static async Task VisionExample()
         {
             Console.WriteLine("\n--- Vision Example ---");
-            // Example: analyze image to extract text (OCR) & description
+
             ImageAnalysisClient client = new ImageAnalysisClient(
              new Uri(visionEndpoint),
              new AzureKeyCredential(visionKey));
@@ -62,10 +64,10 @@ namespace AzureAIMiniExamples
             foreach (DetectedTextBlock block in result.Read.Blocks)
                 foreach (DetectedTextLine line in block.Lines)
                 {
-                    Console.WriteLine($"   Line: '{line.Text}', Bounding Polygon: [{string.Join(" ", line.BoundingPolygon)}]");
+                    Console.WriteLine($"   Line: '{line.Text}'");
                     foreach (DetectedTextWord word in line.Words)
                     {
-                        Console.WriteLine($"     Word: '{word.Text}', Confidence {word.Confidence.ToString("#.####")}, Bounding Polygon: [{string.Join(" ", word.BoundingPolygon)}]");
+                        Console.WriteLine($"     Word: '{word.Text}', Confidence {word.Confidence.ToString("#.####")}");
                     }
                 }
         }
@@ -76,6 +78,7 @@ namespace AzureAIMiniExamples
         static async Task SpeechExample()
         {
             Console.WriteLine("\n---Speech Example ---text to speech---");
+
             var config = SpeechConfig.FromEndpoint(new Uri(speechEndpoint), speechKey);
             config.SpeechRecognitionLanguage = "en-US";
             config.SpeechSynthesisVoiceName = "en-US-AvaMultilingualNeural";
@@ -95,11 +98,7 @@ namespace AzureAIMiniExamples
                 }
                 else
                 {
-                    Console.WriteLine($"Speech synthesis failed: {result.Reason}");
-                    if (result.Reason == ResultReason.Canceled)
-                    {
-                        Console.WriteLine($"Speech synthesis failed");
-                    }
+                    Console.WriteLine($"Speech synthesis failed: {result.Reason}");                   
                 }
             }
         }
@@ -110,7 +109,7 @@ namespace AzureAIMiniExamples
         /// </summary>
         static async Task LanguageExample()
         {
-            Console.WriteLine("\n--- Text Analytics Example ---");
+            Console.WriteLine("\n--- Language Example ---");
 
             var client = new Azure.AI.TextAnalytics.TextAnalyticsClient(
                 new Uri(languageEndpoint),
@@ -155,7 +154,7 @@ namespace AzureAIMiniExamples
         static async Task SearchExample()
         {
             Console.WriteLine("\n--- Search Example ---");
-            // Example: simple search query over pre-existing index
+
             var client = new Azure.Search.Documents.SearchClient(
                 new Uri(searchEndpoint),
                 "hotels-sample-index",
@@ -167,6 +166,7 @@ namespace AzureAIMiniExamples
                 Console.WriteLine($"Found document: {doc.Document["HotelId"]}  {doc.Document["HotelName"]}");
             }
         }
+
 
         /// <summary>
         /// Extracts fields from document using prebuilt model.
@@ -195,13 +195,14 @@ namespace AzureAIMiniExamples
             }
         }
 
+
         /// <summary>
         /// Analyzes input text for potentially harmful or unsafe content using the Content Safety API.
         /// </summary>
         static async Task ContentSafetyExample()
         {
             Console.WriteLine("\n--- Content Safety Example ---");
-            // Example: check text for harmful content
+
             var client = new Azure.AI.ContentSafety.ContentSafetyClient(
                 new Uri(contentSafetyEndpoint),
                 new Azure.AzureKeyCredential(contentSafetyKey));
